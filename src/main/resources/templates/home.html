@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>고독한 미식가</title>
+    <style>
+        /* 배경과 전체 레이아웃 */
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: url('https://search.pstatic.net/common/?src=http%3A%2F%2Fblogfiles.naver.net%2F20140823_267%2Fdlcodla_1408776582386HoUQf_JPEG%2F1408776578770_DSC01637.JPG&type=a340') no-repeat center center/cover;
+            color: white;
+            text-align: center;
+        }
+
+        /* 헤더 스타일 */
+        header {
+            background-color: rgba(0, 0, 0, 0.6);
+            padding: 20px;
+            font-size: 2rem;
+            font-weight: bold;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 버튼 스타일 */
+        button {
+            margin-top: 200px;
+            padding: 15px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.8);
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            background-color: rgba(0, 0, 0, 0.9);
+            transform: scale(1.1);
+        }
+
+
+    </style>
+</head>
+<body>
+<header>고독한 미식가</header>
+<button onclick="moveNotice()">맛집 리스트 보기</button>
+<script>
+    const moveNotice = () => {
+        location.href = "/board/notice";
+    }
+</script>
+</body>
+</html>
