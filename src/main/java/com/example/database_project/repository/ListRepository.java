@@ -17,28 +17,32 @@ public interface ListRepository extends JpaRepository<ListEntity, Long> {
     // INSERT 쿼리
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO list_table (user_id, list_title, list_type, list_menu, list_like, list_created_time, list_updated_time) " +
-            "VALUES (:userId, :listTitle, :listType, :listMenu, :listLike, NOW(), NOW())",
+    @Query(value = "INSERT INTO list_table (user_id, list_title, list_type, list_menu, list_address, list_like, list_created_time, list_updated_time) " +
+            "VALUES (:userId, :listTitle, :listType, :listMenu, :listAddress, :listLike, NOW(), NOW())",
             nativeQuery = true)
     void saveList(
             @Param("userId") String userId,
             @Param("listTitle") String listTitle,
             @Param("listType") String listType,
             @Param("listMenu") String listMenu,
+            @Param("listAddress") String listAddress,
             @Param("listLike") int listLike);
 
     // UPDATE 쿼리
     @Modifying
     @Transactional
-    @Query(value = "UPDATE list_table SET user_id = :userId, list_title = :listTitle, list_type = :listType, list_menu = :listMenu, list_like = :listLike, list_updated_time = NOW() " +
-            "WHERE lid = :id", nativeQuery = true)
+    @Query(value = "UPDATE list_table SET user_id = :userId, list_title = :listTitle, list_type = :listType, list_menu = :listMenu, list_address = :listAddress, list_like = :listLike, list_updated_time = NOW() " +
+            "WHERE lid = :id",
+            nativeQuery = true)
     void updateList(
             @Param("userId") String userId,
             @Param("listTitle") String listTitle,
             @Param("listType") String listType,
             @Param("listMenu") String listMenu,
+            @Param("listAddress") String listAddress,
             @Param("listLike") int listLike,
             @Param("id") Long id);
+
 
     // SELECT 쿼리 (전체 리스트 조회)
     @Query(value = "SELECT * FROM list_table", nativeQuery = true)

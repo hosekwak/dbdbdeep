@@ -38,6 +38,7 @@ public class ListService {
                 listEntity.getListTitle(),
                 listEntity.getListType(),
                 listEntity.getListMenu(),
+                listEntity.getListAddress(),
                 listEntity.getListLike()
 
         );
@@ -67,6 +68,7 @@ public class ListService {
                 listEntity.getListTitle(),
                 listEntity.getListType(),
                 listEntity.getListMenu(),
+                listEntity.getListAddress(),
                 listEntity.getListLike(),
                 listEntity.getLid()
         );

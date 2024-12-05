@@ -21,6 +21,7 @@
         <th>제목</th>
         <th>종류</th>
         <th>대표 메뉴</th>
+        <th>주소</th>
         <th>좋아요</th>
         <th>수정</th>
         <th>삭제</th>
@@ -33,6 +34,7 @@
         <td th:text="${list.listTitle}"></td>
         <td th:text="${list.listType}"></td>
         <td th:text="${list.listMenu}"></td>
+        <td th:text="${list.listAddress}"></td> <!-- 주소 -->
         <td>
             <button th:onclick="'location.href=\'/list/like/' + ' ' + ${list.id} + '\''"
                     style="padding: 5px 10px; background-color: #FFC107; color: white; text-decoration: none; border: none; border-radius: 3px; cursor: pointer;">

@@ -26,6 +26,9 @@ public class ListEntity extends ListBaseEntity {
    @Column(name = "list_menu")//대표 메뉴
    private String listMenu;
 
+   @Column(name = "list_address") // 음식점 위치
+   private String listAddress;
+
    @Column(name = "list_like")
    private int listLike = 0;
 
@@ -35,6 +38,7 @@ public class ListEntity extends ListBaseEntity {
       listEntity.setListTitle(listDTO.getListTitle());
       listEntity.setListType(listDTO.getListType());
       listEntity.setListMenu(listDTO.getListMenu());
+      listEntity.setListAddress(listDTO.getListAddress());
       listEntity.setListLike(listDTO.getListLike());
       return listEntity;
    }
@@ -46,6 +50,7 @@ public class ListEntity extends ListBaseEntity {
       listEntity.setListTitle(listDTO.getListTitle());
       listEntity.setListType(listDTO.getListType());
       listEntity.setListMenu(listDTO.getListMenu());
+      listEntity.setListAddress(listDTO.getListAddress());
       listEntity.setListLike(listDTO.getListLike());
       return listEntity;
    }

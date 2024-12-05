@@ -18,18 +18,20 @@ public class ListDTO {
     private String listTitle;
     private String listType;
     private String listMenu;
+    private String listAddress;
     private int listLike;
 
     private LocalDateTime listCreatedTime;
     private LocalDateTime listUpdatedTime;
 
 
-    public ListDTO(long id,String userID, String listTitle, String listType, String listMenu, int listLike) {
+    public ListDTO(long id,String userID, String listTitle, String listType, String listMenu,String listAddress, int listLike) {
         this.id = id;
         this.userID = userID;
         this.listTitle = listTitle;
         this.listType = listType;
         this.listMenu = listMenu;
+        this.listAddress = listAddress;
         this.listLike = listLike;
     }
 
@@ -41,6 +43,7 @@ public class ListDTO {
         listDTO.setListTitle(listEntity.getListTitle());
         listDTO.setListType(listEntity.getListType());
         listDTO.setListMenu(listEntity.getListMenu());
+        listDTO.setListAddress(listEntity.getListAddress());
         listDTO.setListLike(listEntity.getListLike());
 
         listDTO.setListCreatedTime(listEntity.getListCreatedTime());
