@@ -1,4 +1,4 @@
-package com.example.database_project.Controller;
+package com.example.database_project.controller;
 
 import com.example.database_project.dto.MemberDTO;
 import com.example.database_project.entity.MemberEntity;
@@ -42,12 +42,18 @@ public class memberController {
     public String login(@ModelAttribute MemberDTO memberDTO, HttpSession session) {
         MemberDTO loginResult = memberService.login(memberDTO);
         if (loginResult != null) {
-            System.out.println("login result: " + loginResult);
-            session.setAttribute("loginEmail", loginResult.getMemberEmail());
+            session.setAttribute("memberDTO", loginResult);
+            session.setAttribute("id", loginResult.getId());
             return "redirect:/home";
         }
         else{
-            return "/login";
+            return "redirect:/login";
         }
     }
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/home";
+    }
+
 }

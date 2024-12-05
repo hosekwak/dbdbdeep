@@ -16,4 +16,8 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
     @Transactional
     @Query(value = "select * from member where member_email = ?1", nativeQuery = true)
     Optional<MemberEntity> findByEmail(String email);
+
+    @Transactional
+    @Query(value = "select * from member where id = ?1", nativeQuery = true)
+    MemberEntity findById(long id);
 }

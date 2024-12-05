@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -175,6 +175,10 @@
         <a th:href="@{/list/search(keyword=${keyword}, page=${listPage.number + 1})}">다음</a>
     </li>
 </ul>
+    <script th:if="${alertMessage}" th:inline="javascript">
+        alert([[${alertMessage}]]);
+    </script>
+
 
 </body>
 </html>

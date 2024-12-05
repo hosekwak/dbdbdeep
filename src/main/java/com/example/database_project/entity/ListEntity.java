@@ -1,7 +1,10 @@
 package com.example.database_project.entity;
 
 import com.example.database_project.dto.ListDTO;
+import com.example.database_project.dto.MemberDTO;
+import com.example.database_project.repository.MemberRepository;
 import jakarta.persistence.*;
+import jakarta.servlet.http.HttpSession;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -14,8 +17,9 @@ public class ListEntity extends ListBaseEntity {
    @GeneratedValue(strategy = GenerationType.IDENTITY)
    private long lid;
 
-   @Column(length = 20, nullable = false)
-   private String userId = "hose";
+   @ManyToOne(fetch = FetchType.LAZY)
+   @JoinColumn(name = "memberId", referencedColumnName = "id") // 외래 키 설정
+   private MemberEntity member; // MemberEntity와 관계를 맺음
 
    @Column(name = "list_title") //음식점 이름
    private String listTitle;
@@ -32,21 +36,24 @@ public class ListEntity extends ListBaseEntity {
    @Column(name = "list_like")
    private int listLike = 0;
 
-   public static ListEntity toSaveEntity(ListDTO listDTO) {
-      ListEntity listEntity = new ListEntity();
-      listEntity.setUserId(listDTO.getUserID());
-      listEntity.setListTitle(listDTO.getListTitle());
-      listEntity.setListType(listDTO.getListType());
-      listEntity.setListMenu(listDTO.getListMenu());
-      listEntity.setListAddress(listDTO.getListAddress());
-      listEntity.setListLike(listDTO.getListLike());
-      return listEntity;
+
+    public static ListEntity toSaveEntity(ListDTO listDTO, HttpSession session) {
+       ListEntity listEntity = new ListEntity();
+       listEntity.setMember(MemberEntity.toMemberEntity((MemberDTO) session.getAttribute("memberDTO")));
+       System.out.println("session result: " + session.getAttribute("id"));
+       listEntity.setListTitle(listDTO.getListTitle());
+       listEntity.setListType(listDTO.getListType());
+       listEntity.setListMenu(listDTO.getListMenu());
+       listEntity.setListAddress(listDTO.getListAddress());
+       listEntity.setListLike(listDTO.getListLike());
+       return listEntity;
    }
 
-   public static ListEntity toUpdateEntity(ListDTO listDTO) {
+   public static ListEntity toUpdateEntity(ListDTO listDTO, HttpSession session) {
       ListEntity listEntity = new ListEntity();
       listEntity.setLid(listDTO.getId());
-      listEntity.setUserId(listDTO.getUserID());
+      listEntity.setMember(MemberEntity.toMemberEntity((MemberDTO) session.getAttribute("memberDTO")));
+      System.out.println("session result: " + session.getAttribute("id"));
       listEntity.setListTitle(listDTO.getListTitle());
       listEntity.setListType(listDTO.getListType());
       listEntity.setListMenu(listDTO.getListMenu());

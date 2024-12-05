@@ -18,7 +18,12 @@ public class MemberService {
 
     public void saveMember(MemberDTO memberDTO) {
         MemberEntity memberEntity = MemberEntity.toMemberEntity(memberDTO);
-        memberRepository.saveMember(memberEntity.getId(),memberEntity.getMemberName(), memberEntity.getMemberEmail(), memberEntity.getMemberPassword());
+        memberRepository.saveMember(
+                memberEntity.getId(),
+                memberEntity.getMemberName(),
+                memberEntity.getMemberEmail(),
+                memberEntity.getMemberPassword()
+        );
     }
     public MemberDTO login(MemberDTO memberDTO) {
         Optional<MemberEntity> byMemberEmail = memberRepository.findByEmail(memberDTO.getMemberEmail());

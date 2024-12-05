@@ -3,6 +3,8 @@ package com.example.database_project.service;
 import com.example.database_project.dto.ListDTO;
 import com.example.database_project.entity.ListEntity;
 import com.example.database_project.repository.ListRepository;
+import com.example.database_project.repository.MemberRepository;
+import jakarta.servlet.http.HttpSession;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +27,8 @@ public class ListService {
 
     private final ListRepository listRepository;
     private final PropertyResolver propertyResolver;
+    private final MemberRepository memberRepository;
+    private final HttpSession httpSession;
 
 
     public List<ListDTO> finALL() {
@@ -37,13 +41,10 @@ public class ListService {
     }
 
     // 저장
-    public void save(ListDTO listDTO) throws IOException {
-        if (listDTO.getUserID() == null || listDTO.getUserID().isEmpty()) {
-            listDTO.setUserID("hose");
-        }
-        ListEntity listEntity = ListEntity.toSaveEntity(listDTO);
+    public void save(ListDTO listDTO, HttpSession session) {
+        ListEntity listEntity = ListEntity.toSaveEntity(listDTO, session);
         listRepository.saveList(
-                listEntity.getUserId(),
+                (Long) session.getAttribute("id"),
                 listEntity.getListTitle(),
                 listEntity.getListType(),
                 listEntity.getListMenu(),
@@ -66,14 +67,10 @@ public class ListService {
         }
     }
 
-    public ListDTO update(ListDTO listDTO) {
-
-        if (listDTO.getUserID() == null || listDTO.getUserID().isEmpty()) {
-            listDTO.setUserID("hose");
-        }
-        ListEntity listEntity = ListEntity.toUpdateEntity(listDTO);
+    public ListDTO update(ListDTO listDTO, HttpSession session) {
+        ListEntity listEntity = ListEntity.toUpdateEntity(listDTO, session);
         listRepository.updateList(
-                listEntity.getUserId(),
+                (Long) session.getAttribute("id"),
                 listEntity.getListTitle(),
                 listEntity.getListType(),
                 listEntity.getListMenu(),
@@ -93,7 +90,7 @@ public class ListService {
 
         return listEntities.map(entity -> new ListDTO(
                 entity.getLid(),
-                entity.getUserId(),
+                entity.getMember().getId(),
                 entity.getListTitle(),
                 entity.getListType(),
                 entity.getListMenu(),
@@ -118,7 +115,7 @@ public class ListService {
 
         return searchResults.map(entity -> new ListDTO(
                 entity.getLid(),
-                entity.getUserId(),
+                entity.getMember().getId(),
                 entity.getListTitle(),
                 entity.getListType(),
                 entity.getListMenu(),
