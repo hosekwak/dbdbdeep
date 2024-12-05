@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>맛집 목록</title>
+</head>
+<body>
+<h1>맛집 목록</h1>
+
+<!-- 글쓰기 버튼 -->
+<div style="margin-bottom: 20px;">
+    <a href="/list/save" style="padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">글쓰기</a>
+</div>
+
+<!-- 게시물 리스트 -->
+<table border="1" cellspacing="0" cellpadding="10" style="width: 100%; border-collapse: collapse;">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>제목</th>
+        <th>종류</th>
+        <th>대표 메뉴</th>
+        <th>좋아요</th>
+        <th>수정</th>
+        <th>삭제</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- 데이터 반복 출력 -->
+    <tr th:each="list : ${listList}">
+        <td th:text="${list.id}"></td>
+        <td th:text="${list.listTitle}"></td>
+        <td th:text="${list.listType}"></td>
+        <td th:text="${list.listMenu}"></td>
+        <td>
+            <button th:onclick="'location.href=\'/list/like/' + ' ' + ${list.id} + '\''"
+                    style="padding: 5px 10px; background-color: #FFC107; color: white; text-decoration: none; border: none; border-radius: 3px; cursor: pointer;">
+                좋아요
+            </button>
+        </td>
+        <td>
+            <a th:href="@{'/list/update/' + ${list.id}}" style="padding: 5px 10px; background-color: #2196F3; color: white; text-decoration: none; border-radius: 3px;">수정</a>
+        </td>
+        <td>
+            <a th:href="@{'/list/delete/' + ${list.id}}" style="padding: 5px 10px; background-color: #f44336; color: white; text-decoration: none; border-radius: 3px;">삭제</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+</body>
+</html>

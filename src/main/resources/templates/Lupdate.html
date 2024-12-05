@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>맛집 수정</title>
+</head>
+<body>
+<h1>맛집 리스트를 수정하세요!</h1>
+<form action="/list/update" method="post">
+    <input type="hidden" name="id" th:value="${list.id}" />
+    <label>제목:</label><input type="text" name="listTitle" th:value="${list.listTitle}" /><br />
+    <label>종류:</label><input type="text" name="listType" th:value="${list.listType}" /><br />
+    <label>대표 메뉴:</label><input type="text" name="listMenu" th:value="${list.listMenu}" /><br />
+    <button type="submit">수정</button>
+</form>
+</body>
+</html>
