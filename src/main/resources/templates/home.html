@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -53,5 +53,8 @@
         location.href = "/board/notice";
     }
 </script>
+<a href="/signUp">회원가입</a>
+<a href="/login">로그인</a>
+session값 : <p th:text="${session.loginEmail}"></p>
 </body>
 </html>
