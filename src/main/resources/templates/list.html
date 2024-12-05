@@ -4,17 +4,132 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>맛집 목록</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        .button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .button:hover {
+            background-color: #45a049;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            color: #333;
+        }
+
+        td a {
+            padding: 5px 10px;
+            text-decoration: none;
+            border-radius: 3px;
+        }
+
+        .edit-btn {
+            background-color: #2196F3;
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background-color: #1976D2;
+        }
+
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        .like-btn {
+            background-color: #FFC107;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 3px;
+        }
+
+        .like-btn:hover {
+            background-color: #FFA000;
+        }
+
+        .pagination {
+            margin-top: 20px;
+            display: flex;
+            justify-content: center;
+            list-style: none;
+            padding: 0;
+        }
+
+        .pagination li {
+            margin: 0 5px;
+        }
+
+        .pagination a {
+            padding: 5px 10px;
+            text-decoration: none;
+            background-color: #f2f2f2;
+            color: black;
+            border-radius: 3px;
+        }
+
+        .pagination a:hover {
+            background-color: #ddd;
+        }
+
+        .pagination .active a {
+            background-color: #4CAF50;
+            color: white;
+        }
+    </style>
 </head>
 <body>
+
 <h1>맛집 목록</h1>
 
 <!-- 글쓰기 버튼 -->
-<div style="margin-bottom: 20px;">
-    <a href="/list/save" style="padding: 10px 20px; background-color: #4CAF50; color: white; text-decoration: none; border-radius: 5px;">글쓰기</a>
+<div style="margin-bottom: 20px; text-align: right;">
+    <a href="/list/save" class="button">글쓰기</a>
 </div>
 
+<!-- 검색 폼 -->
+<form action="/list/search" method="get" style="margin-bottom: 20px; text-align: center;">
+    <input type="text" name="keyword" th:value="${keyword}" placeholder="검색어를 입력하세요" style="padding: 5px; width: 300px;" />
+    <button type="submit" class="button" style="background-color: #2196F3;">검색</button>
+</form>
+
 <!-- 게시물 리스트 -->
-<table border="1" cellspacing="0" cellpadding="10" style="width: 100%; border-collapse: collapse;">
+<table>
     <thead>
     <tr>
         <th>ID</th>
@@ -28,27 +143,38 @@
     </tr>
     </thead>
     <tbody>
-    <!-- 데이터 반복 출력 -->
-    <tr th:each="list : ${listList}">
+    <tr th:each="list : ${listPage.content}">
         <td th:text="${list.id}"></td>
         <td th:text="${list.listTitle}"></td>
         <td th:text="${list.listType}"></td>
         <td th:text="${list.listMenu}"></td>
-        <td th:text="${list.listAddress}"></td> <!-- 주소 -->
+        <td th:text="${list.listAddress}"></td>
         <td>
-            <button th:onclick="'location.href=\'/list/like/' + ' ' + ${list.id} + '\''"
-                    style="padding: 5px 10px; background-color: #FFC107; color: white; text-decoration: none; border: none; border-radius: 3px; cursor: pointer;">
-                좋아요
-            </button>
+            <form action="/list/like" method="post" style="margin: 0;">
+                <input type="hidden" name="id" th:value="${list.id}" />
+                <button type="submit" class="like-btn">좋아요</button>
+            </form>
+            <span th:text="${list.listLike}"></span>
         </td>
-        <td>
-            <a th:href="@{'/list/update/' + ${list.id}}" style="padding: 5px 10px; background-color: #2196F3; color: white; text-decoration: none; border-radius: 3px;">수정</a>
-        </td>
-        <td>
-            <a th:href="@{'/list/delete/' + ${list.id}}" style="padding: 5px 10px; background-color: #f44336; color: white; text-decoration: none; border-radius: 3px;">삭제</a>
-        </td>
+        <td><a th:href="@{'/list/update/' + ${list.id}}" class="edit-btn">수정</a></td>
+        <td><a th:href="@{'/list/delete/' + ${list.id}}" class="delete-btn">삭제</a></td>
     </tr>
     </tbody>
 </table>
+
+<!-- 페이지 네비게이션 -->
+<ul class="pagination">
+    <li th:if="${listPage.hasPrevious()}">
+        <a th:href="@{/list/search(keyword=${keyword}, page=${listPage.number - 1})}">이전</a>
+    </li>
+    <li th:each="i : ${#numbers.sequence(0, listPage.totalPages - 1)}"
+        th:classappend="${listPage.number == i} ? 'active'">
+        <a th:href="@{/list/search(keyword=${keyword}, page=${i})}" th:text="${i + 1}"></a>
+    </li>
+    <li th:if="${listPage.hasNext()}">
+        <a th:href="@{/list/search(keyword=${keyword}, page=${listPage.number + 1})}">다음</a>
+    </li>
+</ul>
+
 </body>
 </html>

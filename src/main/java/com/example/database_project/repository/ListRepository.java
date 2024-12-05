@@ -2,6 +2,8 @@ package com.example.database_project.repository;
 
 import com.example.database_project.entity.ListEntity;
 import jakarta.transaction.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -57,6 +59,38 @@ public interface ListRepository extends JpaRepository<ListEntity, Long> {
     @Transactional
     @Query(value = "DELETE FROM list_table WHERE lid = :id", nativeQuery = true)
     void deleteBylId(@Param("id") Long id);
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE list_table SET list_like = list_like + 1 WHERE lid = :id", nativeQuery = true)
+    void incrementLike(@Param("id") Long id);
+
+    // 좋아요 수 감소
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE list_table SET list_like = list_like - 1 WHERE lid = :listId", nativeQuery = true)
+    void decrementLike(@Param("listId") Long listId);
+
+
+    @Query(value = "SELECT * FROM list_table ORDER BY list_created_time DESC",
+            countQuery = "SELECT COUNT(*) FROM list_table",
+            nativeQuery = true)
+    Page<ListEntity> findAllWithPaging(Pageable pageable);
+
+    @Query(value = "SELECT * FROM list_table " +
+            "WHERE list_title LIKE %:keyword% " +
+            "OR list_type LIKE %:keyword% " +
+            "OR list_menu LIKE %:keyword% " +
+            "OR list_address LIKE %:keyword%",
+            countQuery = "SELECT COUNT(*) FROM list_table " +
+                    "WHERE list_title LIKE %:keyword% " +
+                    "OR list_type LIKE %:keyword% " +
+                    "OR list_menu LIKE %:keyword% " +
+                    "OR list_address LIKE %:keyword%",
+            nativeQuery = true)
+    Page<ListEntity> searchAllByKeyword(@Param("keyword") String keyword, Pageable pageable);
+
+
 
 }
 

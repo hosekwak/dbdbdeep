@@ -3,7 +3,15 @@ package com.example.database_project.service;
 import com.example.database_project.dto.ListDTO;
 import com.example.database_project.entity.ListEntity;
 import com.example.database_project.repository.ListRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+
+import org.hibernate.query.Order;
+import org.springframework.core.env.PropertyResolver;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -16,6 +24,7 @@ import java.util.Optional;
 public class ListService {
 
     private final ListRepository listRepository;
+    private final PropertyResolver propertyResolver;
 
 
     public List<ListDTO> finALL() {
@@ -78,6 +87,47 @@ public class ListService {
     public void deleteById(Long id) {
         listRepository.deleteBylId(id);
     }
+
+    public Page<ListDTO> paging(Pageable pageable) {
+        Page<ListEntity> listEntities = listRepository.findAllWithPaging(pageable);
+
+        return listEntities.map(entity -> new ListDTO(
+                entity.getLid(),
+                entity.getUserId(),
+                entity.getListTitle(),
+                entity.getListType(),
+                entity.getListMenu(),
+                entity.getListAddress(),
+                entity.getListLike()
+        ));
+    }
+
+
+    @Transactional
+    public void increaseLike(Long id) {
+        listRepository.incrementLike(id); // 좋아요 수 증가 쿼리 실행
+    }
+
+    @Transactional
+    public void decreaseLike(Long id) {
+        listRepository.decrementLike(id); // 좋아요 수 증가 쿼리 실행
+    }
+
+    public Page<ListDTO> search(String keyword, Pageable pageable) {
+        Page<ListEntity> searchResults = listRepository.searchAllByKeyword(keyword, pageable);
+
+        return searchResults.map(entity -> new ListDTO(
+                entity.getLid(),
+                entity.getUserId(),
+                entity.getListTitle(),
+                entity.getListType(),
+                entity.getListMenu(),
+                entity.getListAddress(),
+                entity.getListLike()
+        ));
+    }
+
+
 
 
 }

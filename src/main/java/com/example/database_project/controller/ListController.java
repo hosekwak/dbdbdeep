@@ -3,6 +3,10 @@ package com.example.database_project.controller;
 import com.example.database_project.dto.ListDTO;
 import com.example.database_project.service.ListService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -19,12 +23,12 @@ public class ListController {
 
     // 리스트 전체 조회
     @GetMapping
-    public String list(Model model) {
-        // 서비스 계층에서 데이터 가져오기
-        List<ListDTO> listList = listService.finALL();
-        model.addAttribute("listList", listList);
-        return "list";
+    public String list(@PageableDefault(size = 10, sort = "list_created_time", direction = Sort.Direction.DESC) Pageable pageable, Model model) {
+        Page<ListDTO> listPage = listService.paging(pageable);
+        model.addAttribute("listPage", listPage);
+        return "list"; // 반환하는 뷰 이름
     }
+
 
     // 저장 폼 요청
     @GetMapping("/save")
@@ -61,4 +65,23 @@ public class ListController {
         listService.deleteById(id);
         return "redirect:/list";
     }
+
+    @PostMapping("/like")
+    public String increaseLike(@RequestParam Long id) {
+        listService.increaseLike(id); // 좋아요 증가 처리
+        return "redirect:/list"; // 목록 페이지로 리다이렉트
+    }
+
+    @GetMapping("/search")
+    public String search(@RequestParam String keyword,
+                         @PageableDefault(size = 10, sort = "list_created_time", direction = Sort.Direction.DESC) Pageable pageable,
+                         Model model) {
+        Page<ListDTO> searchResults = listService.search(keyword, pageable);
+        model.addAttribute("listPage", searchResults);
+        model.addAttribute("keyword", keyword);
+        return "list";
+    }
+
+
+
 }
