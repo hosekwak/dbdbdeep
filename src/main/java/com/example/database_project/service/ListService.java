@@ -97,7 +97,18 @@ public class ListService {
                 entity.getListLike()
         ));
     }
-
+    public Page<ListDTO> pagingsSortByLike(Pageable pageable) {
+        Page<ListEntity> listEntities = listRepository.findAllWithPagingSortByLike(pageable);
+        return listEntities.map(entity -> new ListDTO(
+                entity.getLid(),
+                entity.getMember().getId(),
+                entity.getListTitle(),
+                entity.getListType(),
+                entity.getListMenu(),
+                entity.getListAddress(),
+                entity.getListLike()
+        ));
+    }
 
     @Transactional
     public void increaseLike(Long id) {

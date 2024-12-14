@@ -77,6 +77,11 @@ public interface ListRepository extends JpaRepository<ListEntity, Long> {
             nativeQuery = true)
     Page<ListEntity> findAllWithPaging(Pageable pageable);
 
+    @Query(value = "SELECT * FROM list_table ORDER BY list_like DESC",
+            countQuery = "SELECT COUNT(*) FROM list_table",
+            nativeQuery = true)
+    Page<ListEntity> findAllWithPagingSortByLike(Pageable pageable);
+
     @Query(value = "SELECT * FROM list_table " +
             "WHERE list_title LIKE %:keyword% " +
             "OR list_type LIKE %:keyword% " +

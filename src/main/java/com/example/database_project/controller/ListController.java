@@ -29,26 +29,44 @@ public class ListController {
     // 리스트 전체 조회
     @GetMapping
     public String list(
-            @PageableDefault(size = 10, sort = "list_created_time", direction = Sort.Direction.DESC) Pageable pageable,
+            @PageableDefault(size = 10, direction = Sort.Direction.DESC) Pageable pageable,
             Model model,
             HttpSession session
     ) {
+        System.out.println("sortby result: " + session.getAttribute("sortby"));
+        if(session.getAttribute("id") == null) {
+            return "/home";
+        }
+        System.out.println("stop point: 40");
+        int sortBy = (int) session.getAttribute("sortby");
+        // sortBy 값에 따라 다른 정렬 방식을 처리
         Page<ListDTO> listPage = listService.paging(pageable);
+        if (sortBy == 1) {
+            listPage = listService.pagingsSortByLike(pageable); // 추천순 정렬
+        }
         model.addAttribute("listPage", listPage);
-
         int currentPage = listPage.getNumber() + 1; // 페이지 번호는 0부터 시작하므로 1을 더함
         int totalPages = listPage.getTotalPages();
-
+        System.out.println("stop point: 50");
         int startPage = ((currentPage - 1) / 10) * 10 + 1;
         int endPage = Math.min(startPage + 9, totalPages);
 
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
-
-        return "list"; // 반환하는 뷰 이름
+        System.out.println("stop point: 60");
+        return "/list"; // 반환하는 뷰 이름
     }
 
-
+    @GetMapping("/sortbylike")
+    public String listSortByLike(
+            Pageable pageable,
+            Model model,
+            HttpSession session)
+    {
+        session.setAttribute("sortby",(int)1);
+        System.out.println("sortby result: " + session.getAttribute("sortby"));
+        return "redirect:/list"; // 반환하는 뷰 이름
+    }
 
     // 저장 폼 요청
     @GetMapping("/save")
@@ -56,7 +74,7 @@ public class ListController {
         System.out.println("session result: " + session.getAttribute("id"));
         System.out.println("session result: " + session.getAttribute("memberEmail"));
         System.out.println("session result: " + session.getAttribute("memberPassword"));
-        return "Lsave";
+        return "/Lsave";
     }
 
     // 데이터 저장
@@ -78,7 +96,7 @@ public class ListController {
             return "redirect:/list";
         }
         else{
-            return "Lupdate";
+            return "/Lupdate";
         }
 
     }
@@ -118,7 +136,7 @@ public class ListController {
         Page<ListDTO> searchResults = listService.search(keyword, pageable);
         model.addAttribute("listPage", searchResults);
         model.addAttribute("keyword", keyword);
-        return "list";
+        return "/list";
     }
 
 
