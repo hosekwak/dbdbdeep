@@ -80,8 +80,8 @@
         <textarea id="listContents" th:field="*{listContents}" rows="5" required></textarea>
     </div>
     <div>
-        <label for="listFile">파일 첨부:</label>
-        <input type="file" id="listFile" th:field="*{listFile}" multiple />
+        <label for="listFile">Attach Files:</label>
+        <input type="file" id="listFile" name="listFile" multiple /> <br/>
     </div>
     <div>
         <button type="submit">저장</button>

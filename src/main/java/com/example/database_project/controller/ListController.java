@@ -49,13 +49,17 @@ public class ListController {
 
     @GetMapping("/{lid}/detail")
     public String findById(@PathVariable Long lid, Model model,
-                           @RequestParam(value = "page",defaultValue = "0")int page) {
+                           @RequestParam(value = "page", defaultValue = "0") int page) {
         ListDTO listDTO = listService.findBylID(lid);
+        if (listDTO == null) {
+            listDTO = new ListDTO(); // 기본값 DTO
+            System.out.println("ListFile: " + listDTO.getListFile());
+        }
         model.addAttribute("listDTO", listDTO);
         model.addAttribute("page", page);
         return "detail";
-
     }
+
 
     // 저장 폼 요청
     @GetMapping("/save")
@@ -95,24 +99,33 @@ public class ListController {
 
     }
 
-    // 데이터 업데이트
     @PostMapping("/update")
-    public String update(@ModelAttribute ListDTO listDTO, HttpSession session) {
+    public String update(@ModelAttribute("listDTO") ListDTO listDTO, BindingResult result, HttpSession session) throws IOException {
+        if (result.hasErrors()) {
+            return "Lupdate"; // 업데이트 폼 페이지 이름으로 변경
+        }
         listService.update(listDTO, session);
         return "redirect:/list";
     }
 
-    // 데이터 삭제
+    // 데이터 삭제 (GET /delete/{id})
     @GetMapping("/delete/{id}")
-    public String delete(@PathVariable long id, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
-        ListDTO listDTO = listService.findBylID(id);
-        if((long) session.getAttribute("id") == listDTO.getMemberId()) {
-            listService.deleteById(id);
+    public String delete(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+        Long sessionId = (Long) session.getAttribute("id");
+        if (sessionId == null) {
+            redirectAttributes.addFlashAttribute("alertMessage", "로그인이 필요합니다.");
+            return "redirect:/login"; // 로그인 페이지로 리다이렉트
         }
-        else{
-            redirectAttributes.addFlashAttribute("alertMessage", "You are not authorized to delete this item!");
 
+        try {
+            listService.deleteById(id, sessionId);
+            redirectAttributes.addFlashAttribute("successMessage", "삭제가 완료되었습니다.");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("alertMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("alertMessage", "삭제 중 오류가 발생했습니다: " + e.getMessage());
         }
+
         return "redirect:/list";
     }
 

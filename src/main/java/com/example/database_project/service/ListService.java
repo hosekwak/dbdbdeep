@@ -3,6 +3,7 @@ package com.example.database_project.service;
 import com.example.database_project.dto.ListDTO;
 import com.example.database_project.entity.ListEntity;
 import com.example.database_project.entity.ListFileEntity;
+import com.example.database_project.entity.MemberEntity;
 import com.example.database_project.repository.ListFileRepository;
 import com.example.database_project.repository.ListRepository;
 import com.example.database_project.repository.MemberRepository;
@@ -44,39 +45,48 @@ public class ListService {
     }
 
     // 저장
+    @Transactional
     public void save(ListDTO listDTO, HttpSession session) throws IOException {
-        if(listDTO.getListFile() == null || listDTO.getListFile().isEmpty()) {
-            ListEntity listEntity = ListEntity.toSaveEntity(listDTO, session);
-            listRepository.saveList(
-                    (Long) session.getAttribute("id"),
-                    listEntity.getListTitle(),
-                    listEntity.getListContents(),
-                    listEntity.getListType(),
-                    listEntity.getListMenu(),
-                    listEntity.getListAddress(),
-                    listEntity.getListLike(),
-                    listEntity.getFileAttached()
-
-            );
+        Long memberId = (Long) session.getAttribute("id");
+        if (memberId == null) {
+            throw new RuntimeException("로그인이 필요합니다.");
         }
-        else {
-            ListEntity listEntity = ListEntity.toSaveFileEntity(listDTO, session);
-            long savedId = listRepository.save(listEntity).getLid();
-            ListEntity list = listRepository.findBylId(savedId).get();
 
-            for(MultipartFile listFile : listDTO.getListFile()) {
-                String originalFilename = listFile.getOriginalFilename();
-                String stroedFilename = System.currentTimeMillis() + "_" + originalFilename;
-                String savePath = "C:/springboot_img/" + stroedFilename;
+        // MemberEntity 조회
+        MemberEntity member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
 
-                listFile.transferTo(new File(savePath));
+        boolean fileExists = listDTO.getListFile() != null &&
+                listDTO.getListFile().stream().anyMatch(file -> file != null && !file.isEmpty());
 
-                ListFileEntity listFileEntity = ListFileEntity.toListFileEntity(list,originalFilename,stroedFilename);
-                listFileRepository.save(listFileEntity);
+        ListEntity listEntity;
+
+        if (!fileExists) { // 파일이 첨부되지 않은 경우
+            listEntity = ListEntity.toSaveEntity(listDTO, member);
+        } else { // 파일이 첨부된 경우
+            listEntity = ListEntity.toSaveFileEntity(listDTO, member);
+        }
+
+        ListEntity savedListEntity = listRepository.save(listEntity);
+
+        // 파일이 첨부된 경우에만 파일 저장
+        if (fileExists) {
+            for (MultipartFile listFile : listDTO.getListFile()) {
+                if (listFile != null && !listFile.isEmpty()) {
+                    String originalFilename = listFile.getOriginalFilename();
+                    String storedFilename = System.currentTimeMillis() + "_" + originalFilename;
+                    String savePath = "C:/springboot_img/" + storedFilename;
+
+                    listFile.transferTo(new File(savePath));
+
+                    ListFileEntity listFileEntity = ListFileEntity.toListFileEntity(savedListEntity, originalFilename, storedFilename);
+                    listFileRepository.save(listFileEntity);
+                }
             }
-
         }
     }
+
+
 
 
     public ListDTO findBylID(Long id) {
@@ -91,23 +101,65 @@ public class ListService {
         }
     }
 
-    public ListDTO update(ListDTO listDTO, HttpSession session) {
-        ListEntity listEntity = ListEntity.toUpdateEntity(listDTO, session);
-        listRepository.updateList(
-                (Long) session.getAttribute("id"),
-                listEntity.getListTitle(),
-                listEntity.getListContents(),
-                listEntity.getListType(),
-                listEntity.getListMenu(),
-                listEntity.getListAddress(),
-                listEntity.getListLike(),
-                listEntity.getLid()
-        );
-        return findBylID(listDTO.getId());
+    // 업데이트
+    @Transactional
+    public void update(ListDTO listDTO, HttpSession session) throws IOException {
+        Long memberId = (Long) session.getAttribute("id");
+        if (memberId == null) {
+            throw new RuntimeException("로그인이 필요합니다.");
+        }
+
+        // MemberEntity 조회
+        MemberEntity member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
+        // ListEntity 조회
+        ListEntity listEntity = listRepository.findById(listDTO.getId())
+                .orElseThrow(() -> new RuntimeException("ListEntity not found"));
+
+        // 필드 업데이트
+        listEntity.setMember(member);
+        listEntity.setListTitle(listDTO.getListTitle());
+        listEntity.setListContents(listDTO.getListContents());
+        listEntity.setListType(listDTO.getListType());
+        listEntity.setListMenu(listDTO.getListMenu());
+        listEntity.setListAddress(listDTO.getListAddress());
+        listEntity.setListLike(listDTO.getListLike());
+        listEntity.setFileAttached(listDTO.getFileAttached());
+
+        listRepository.save(listEntity); // 변경 사항 저장
+
+        if (listDTO.getListFile() != null && !listDTO.getListFile().isEmpty()) {
+            // 기존 파일 삭제 (옵션)
+            // listFileRepository.deleteAll(listEntity.getListFileEntityList());
+
+            // 새로운 파일 첨부
+            for (MultipartFile listFile : listDTO.getListFile()) {
+                String originalFilename = listFile.getOriginalFilename();
+                String storedFilename = System.currentTimeMillis() + "_" + originalFilename;
+                String savePath = "C:/springboot_img/" + storedFilename;
+
+                listFile.transferTo(new File(savePath));
+
+                ListFileEntity listFileEntity = ListFileEntity.toListFileEntity(listEntity, originalFilename, storedFilename);
+                listFileRepository.save(listFileEntity);
+            }
+        }
     }
 
-    public void deleteById(Long id) {
-        listRepository.deleteBylId(id);
+
+    // 데이터 삭제
+    @Transactional
+    public void deleteById(Long id, Long memberId) {
+        ListEntity listEntity = listRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("ListEntity not found"));
+
+        // 권한 확인
+        if (!listEntity.getMember().getId().equals(memberId)) {
+            throw new RuntimeException("You are not authorized to delete this item!");
+        }
+
+        listRepository.delete(listEntity); // CascadeType.REMOVE에 의해 ListFileEntity도 삭제됨
     }
 
     public Page<ListDTO> paging(Pageable pageable) {

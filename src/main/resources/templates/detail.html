@@ -2,9 +2,8 @@
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${list.listTitle}">맛집 상세</title>
+    <title th:text="${listDTO.listTitle}">맛집 상세</title>
     <style>
-        /* 간단한 스타일 추가 */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -44,18 +43,6 @@
             border-radius: 5px;
         }
 
-        .images a {
-            display: block;
-            text-align: center;
-            margin-top: 5px;
-            color: #2196F3;
-            text-decoration: none;
-        }
-
-        .images a:hover {
-            text-decoration: underline;
-        }
-
         .back-button {
             display: block;
             margin: 20px auto;
@@ -74,38 +61,52 @@
     </style>
 </head>
 <body>
-<h1 th:text="${list.listTitle}">맛집 상세</h1>
+<h1 th:text="${listDTO.listTitle}">맛집 상세</h1>
 <div class="details">
     <div class="detail-item">
         <label>종류:</label>
-        <span th:text="${list.listType}">종류</span>
+        <span th:text="${listDTO.listType}">종류</span>
     </div>
     <div class="detail-item">
         <label>대표 메뉴:</label>
-        <span th:text="${list.listMenu}">대표 메뉴</span>
+        <span th:text="${listDTO.listMenu}">대표 메뉴</span>
     </div>
     <div class="detail-item">
         <label>주소:</label>
-        <span th:text="${list.listAddress}">주소</span>
+        <span th:text="${listDTO.listAddress}">주소</span>
     </div>
     <div class="detail-item">
         <label>좋아요:</label>
-        <span th:text="${list.listLike}">0</span>
+        <span th:text="${listDTO.listLike}">0</span>
     </div>
     <div class="detail-item">
         <label>내용:</label>
-        <p th:text="${list.listContents}">내용</p>
+        <p th:text="${listDTO.listContents}">내용</p>
     </div>
+
     <div class="detail-item">
         <label>사진:</label>
         <div class="images">
-            <div th:each="file : ${list.detailFileEntityList}">
-                <img th:src="@{/files/{filename}(filename=${file.storedFilename})}" th:alt="${file.originalFilename}" />
-                <a th:href="@{/files/{filename}(filename=${file.storedFilename})}" download th:text="${file.originalFilename}">Download</a>
+            <!-- 이미지 파일이 존재할 경우 반복 출력 -->
+            <div th:if="${listDTO.fileAttached == 1}">
+                <div th:each="fileName : ${listDTO.storedFileName}">
+                    <!-- 이미지 경로 출력 -->
+                    <img th:src="@{'/upload/' + ${fileName}}"
+                         alt="Uploaded Image"
+                         style="max-width: 400px; max-height: 400px; margin: 5px;" />
+
+                </div>
+            </div>
+            <!-- 파일이 없을 경우 메시지 출력 -->
+            <div th:if="${listDTO.fileAttached != 1}">
+                <span>첨부된 사진이 없습니다.</span>
             </div>
         </div>
     </div>
+
+
 </div>
+
 <a href="/list" class="back-button">목록</a>
 </body>
 </html>
