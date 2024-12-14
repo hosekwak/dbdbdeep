@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -29,7 +30,7 @@ public class ListController {
     // 리스트 전체 조회
     @GetMapping
     public String list(
-            @PageableDefault(size = 10, direction = Sort.Direction.DESC) Pageable pageable,
+            @PageableDefault(size = 10, sort = "list_created_time", direction = Sort.Direction.DESC) Pageable pageable,
             Model model,
             HttpSession session
     ) {
@@ -77,6 +78,19 @@ public class ListController {
         return "redirect:/list"; // 반환하는 뷰 이름
     }
 
+    @GetMapping("/{lid}/detail")
+    public String findById(@PathVariable Long lid, Model model,
+                           @RequestParam(value = "page", defaultValue = "0") int page) {
+        ListDTO listDTO = listService.findBylID(lid);
+        if (listDTO == null) {
+            listDTO = new ListDTO(); // 기본값 DTO
+            System.out.println("ListFile: " + listDTO.getListFile());
+        }
+        model.addAttribute("listDTO", listDTO);
+        model.addAttribute("page", page);
+        return "detail";
+    }
+
     @GetMapping("/myFavorite")
     public String listMyFavorite(
             Pageable pageable,
@@ -96,16 +110,21 @@ public class ListController {
 
     // 저장 폼 요청
     @GetMapping("/save")
-    public String saveForm(HttpSession session) {
+    public String saveForm(Model model, HttpSession session) {
         System.out.println("session result: " + session.getAttribute("id"));
         System.out.println("session result: " + session.getAttribute("memberEmail"));
         System.out.println("session result: " + session.getAttribute("memberPassword"));
-        return "/Lsave";
+
+        model.addAttribute("listDTO", new ListDTO()); // 리스트 DTO 객체를 모델에 추가
+        return "Lsave";
     }
 
     // 데이터 저장
     @PostMapping("/save")
-    public String save(@ModelAttribute ListDTO listDTO, HttpSession session) {
+    public String save(@ModelAttribute("listDTO") ListDTO listDTO, BindingResult result, HttpSession session) throws IOException {
+        if (result.hasErrors()) {
+            return "Lsave"; // 오류가 있을 경우 폼 페이지로 돌아감
+        }
         listService.save(listDTO, session);
         System.out.println("session result: " + session.getAttribute("id"));
         return "redirect:/list";
@@ -127,24 +146,33 @@ public class ListController {
 
     }
 
-    // 데이터 업데이트
     @PostMapping("/update")
-    public String update(@ModelAttribute ListDTO listDTO, HttpSession session) {
+    public String update(@ModelAttribute("listDTO") ListDTO listDTO, BindingResult result, HttpSession session) throws IOException {
+        if (result.hasErrors()) {
+            return "Lupdate"; // 업데이트 폼 페이지 이름으로 변경
+        }
         listService.update(listDTO, session);
         return "redirect:/list";
     }
 
-    // 데이터 삭제
+    // 데이터 삭제 (GET /delete/{id})
     @GetMapping("/delete/{id}")
-    public String delete(@PathVariable long id, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
-        ListDTO listDTO = listService.findBylID(id);
-        if((long) session.getAttribute("id") == listDTO.getMemberId()) {
-            listService.deleteById(id);
+    public String delete(@PathVariable Long id, HttpSession session, RedirectAttributes redirectAttributes) {
+        Long sessionId = (Long) session.getAttribute("id");
+        if (sessionId == null) {
+            redirectAttributes.addFlashAttribute("alertMessage", "로그인이 필요합니다.");
+            return "redirect:/login"; // 로그인 페이지로 리다이렉트
         }
-        else{
-            redirectAttributes.addFlashAttribute("alertMessage", "You are not authorized to delete this item!");
 
+        try {
+            listService.deleteById(id, sessionId);
+            redirectAttributes.addFlashAttribute("successMessage", "삭제가 완료되었습니다.");
+        } catch (RuntimeException e) {
+            redirectAttributes.addFlashAttribute("alertMessage", e.getMessage());
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("alertMessage", "삭제 중 오류가 발생했습니다: " + e.getMessage());
         }
+
         return "redirect:/list";
     }
 

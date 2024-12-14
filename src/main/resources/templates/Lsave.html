@@ -1,18 +1,91 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>맛집 추가</title>
+    <style>
+        /* 간단한 스타일 추가 */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        div {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+        }
+
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+        }
+
+        input[type="file"] {
+            width: 100%;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+    </style>
 </head>
 <body>
 <h1>맛집 리스트를 추가하세요!</h1>
-<form action="/list/save" method="post">
-    <label>제목:</label><input type="text" name="listTitle" /><br />
-    <label>종류:</label><input type="text" name="listType" /><br />
-    <label>대표 메뉴:</label><input type="text" name="listMenu" /><br />
-    <label>주소:</label><input type="text" name="listAddress" /><br />
-    <button type="submit">저장</button>
+<form th:action="@{/list/save}" method="post" enctype="multipart/form-data" th:object="${listDTO}">
+    <div>
+        <label for="listTitle">제목:</label>
+        <input type="text" id="listTitle" th:field="*{listTitle}" required />
+    </div>
+    <div>
+        <label for="listType">종류:</label>
+        <input type="text" id="listType" th:field="*{listType}" required />
+    </div>
+    <div>
+        <label for="listMenu">대표 메뉴:</label>
+        <input type="text" id="listMenu" th:field="*{listMenu}" required />
+    </div>
+    <div>
+        <label for="listAddress">주소:</label>
+        <input type="text" id="listAddress" th:field="*{listAddress}" required />
+    </div>
+    <div>
+        <label for="listContents">내용:</label>
+        <textarea id="listContents" th:field="*{listContents}" rows="5" required></textarea>
+    </div>
+    <div>
+        <label for="listFile">Attach Files:</label>
+        <input type="file" id="listFile" name="listFile" multiple /> <br/>
+    </div>
+    <div>
+        <button type="submit">저장</button>
+    </div>
 </form>
 </body>
 </html>
