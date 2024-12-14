@@ -87,7 +87,6 @@ public class ListService {
 
     public Page<ListDTO> paging(Pageable pageable) {
         Page<ListEntity> listEntities = listRepository.findAllWithPaging(pageable);
-
         return listEntities.map(entity -> new ListDTO(
                 entity.getLid(),
                 entity.getMember().getId(),
