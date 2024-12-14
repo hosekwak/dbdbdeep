@@ -97,7 +97,7 @@ public class ListService {
                 entity.getListLike()
         ));
     }
-    public Page<ListDTO> pagingsSortByLike(Pageable pageable) {
+    public Page<ListDTO> pagingSortByLike(Pageable pageable) {
         Page<ListEntity> listEntities = listRepository.findAllWithPagingSortByLike(pageable);
         return listEntities.map(entity -> new ListDTO(
                 entity.getLid(),
@@ -109,7 +109,18 @@ public class ListService {
                 entity.getListLike()
         ));
     }
-
+    public Page<ListDTO> pagingMyFavorite(Pageable pageable, Long memberId) {
+        Page<ListEntity> listEntities = listRepository.findAllWithPagingMyFavorite(pageable, memberId);
+        return listEntities.map(entity -> new ListDTO(
+                entity.getLid(),
+                entity.getMember().getId(),
+                entity.getListTitle(),
+                entity.getListType(),
+                entity.getListMenu(),
+                entity.getListAddress(),
+                entity.getListLike()
+        ));
+    }
     @Transactional
     public void increaseLike(Long id) {
         listRepository.incrementLike(id); // 좋아요 수 증가 쿼리 실행

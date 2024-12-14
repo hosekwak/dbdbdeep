@@ -33,16 +33,19 @@ public class ListController {
             Model model,
             HttpSession session
     ) {
-        System.out.println("sortby result: " + session.getAttribute("sortby"));
+        System.out.println("option result: " + session.getAttribute("option"));
         if(session.getAttribute("id") == null) {
             return "/home";
         }
         System.out.println("stop point: 40");
-        int sortBy = (int) session.getAttribute("sortby");
+        int option = (int) session.getAttribute("option");
         // sortBy 값에 따라 다른 정렬 방식을 처리
         Page<ListDTO> listPage = listService.paging(pageable);
-        if (sortBy == 1) {
-            listPage = listService.pagingsSortByLike(pageable); // 추천순 정렬
+        if (option == 1) {
+            listPage = listService.pagingSortByLike(pageable); // 추천순 정렬
+        }
+        else if (option == 2) {
+            listPage = listService.pagingMyFavorite(pageable, (Long) session.getAttribute("id")); // 좋아요 표시한 리스트들만 정렬
         }
         model.addAttribute("listPage", listPage);
         int currentPage = listPage.getNumber() + 1; // 페이지 번호는 0부터 시작하므로 1을 더함
@@ -63,8 +66,31 @@ public class ListController {
             Model model,
             HttpSession session)
     {
-        session.setAttribute("sortby",(int)1);
-        System.out.println("sortby result: " + session.getAttribute("sortby"));
+        int option = (int) session.getAttribute("option");
+        if(option == 1) {
+            session.setAttribute("option",(int)0);
+        }
+        else{
+            session.setAttribute("option",(int)1);
+        }
+        System.out.println("option result: " + session.getAttribute("option"));
+        return "redirect:/list"; // 반환하는 뷰 이름
+    }
+
+    @GetMapping("/myFavorite")
+    public String listMyFavorite(
+            Pageable pageable,
+            Model model,
+            HttpSession session)
+    {
+        int option = (int) session.getAttribute("option");
+        if(option == 2) {
+            session.setAttribute("option",(int)0);
+        }
+        else{
+            session.setAttribute("option",(int)2);
+        }
+        System.out.println("option result: " + session.getAttribute("option"));
         return "redirect:/list"; // 반환하는 뷰 이름
     }
 

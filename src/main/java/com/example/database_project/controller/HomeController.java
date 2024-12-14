@@ -9,16 +9,16 @@ public class HomeController {
     @GetMapping("/")
     public String home(HttpSession session) {
 
-        session.setAttribute("sortby", (int)0);
-        System.out.println("sortby result: " + session.getAttribute("sortby"));
+        session.setAttribute("option", (int)0);
+        System.out.println("option result: " + session.getAttribute("option"));
 
         return "/home";
     }
 
     @GetMapping("/home")
     public String homepage(HttpSession session) {
-        session.setAttribute("sortby", (int)0);
-        System.out.println("sortby result: " + session.getAttribute("sortby"));
+        session.setAttribute("option", (int)0);
+        System.out.println("option result: " + session.getAttribute("option"));
 
         return "/home";
     }

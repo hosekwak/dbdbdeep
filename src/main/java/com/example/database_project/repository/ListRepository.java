@@ -82,6 +82,10 @@ public interface ListRepository extends JpaRepository<ListEntity, Long> {
             nativeQuery = true)
     Page<ListEntity> findAllWithPagingSortByLike(Pageable pageable);
 
+    @Query(value = "SELECT * FROM list_table where lid in (select list_id from favorite_list where member_id = :memberId)",
+            nativeQuery = true)
+    Page<ListEntity> findAllWithPagingMyFavorite(Pageable pageable, Long memberId);
+
     @Query(value = "SELECT * FROM list_table " +
             "WHERE list_title LIKE %:keyword% " +
             "OR list_type LIKE %:keyword% " +
