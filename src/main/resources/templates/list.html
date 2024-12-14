@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>맛집 목록</title>
     <style>
+        /* 기존 스타일 유지 */
         body {
             font-family: Arial, sans-serif;
             margin: 20px;
@@ -145,7 +146,9 @@
     <tbody>
     <tr th:each="list : ${listPage.content}">
         <td th:text="${list.id}"></td>
-        <td th:text="${list.listTitle}"></td>
+        <td>
+            <a th:href="@{'/list/' + ${list.id} + '/detail'}" th:text="${list.listTitle}"></a>
+        </td>
         <td th:text="${list.listType}"></td>
         <td th:text="${list.listMenu}"></td>
         <td th:text="${list.listAddress}"></td>
@@ -164,21 +167,26 @@
 
 <!-- 페이지 네비게이션 -->
 <ul class="pagination">
-    <li th:if="${listPage.hasPrevious()}">
-        <a th:href="@{/list/search(keyword=${keyword}, page=${listPage.number - 1})}">이전</a>
+    <!-- 이전 페이지 그룹으로 이동 -->
+    <li th:if="${startPage > 1}">
+        <a th:href="@{/list/search(keyword=${keyword}, page=${startPage - 2})}">이전</a>
     </li>
-    <li th:each="i : ${#numbers.sequence(0, listPage.totalPages - 1)}"
-        th:classappend="${listPage.number == i} ? 'active'">
-        <a th:href="@{/list/search(keyword=${keyword}, page=${i})}" th:text="${i + 1}"></a>
+
+    <!-- 페이지 번호 -->
+    <li th:each="i : ${#numbers.sequence(startPage, endPage)}"
+        th:classappend="${listPage.number + 1 == i} ? 'active'">
+        <a th:href="@{/list/search(keyword=${keyword}, page=${i - 1})}" th:text="${i}"></a>
     </li>
-    <li th:if="${listPage.hasNext()}">
-        <a th:href="@{/list/search(keyword=${keyword}, page=${listPage.number + 1})}">다음</a>
+
+    <!-- 다음 페이지 그룹으로 이동 -->
+    <li th:if="${endPage < listPage.totalPages}">
+        <a th:href="@{/list/search(keyword=${keyword}, page=${endPage})}">다음</a>
     </li>
 </ul>
-    <script th:if="${alertMessage}" th:inline="javascript">
-        alert([[${alertMessage}]]);
-    </script>
 
+<script th:if="${alertMessage}" th:inline="javascript">
+    alert([[${alertMessage}]]);
+</script>
 
 </body>
 </html>

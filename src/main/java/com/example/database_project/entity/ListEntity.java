@@ -8,6 +8,9 @@ import jakarta.servlet.http.HttpSession;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -24,6 +27,9 @@ public class ListEntity extends ListBaseEntity {
    @Column(name = "list_title") //음식점 이름
    private String listTitle;
 
+   @Column(name = "list_contents")
+   private String listContents;
+
    @Column(name = "list_type")//음식점 종류(한식,양식,일식,주점)
    private String listType;
 
@@ -35,6 +41,7 @@ public class ListEntity extends ListBaseEntity {
 
    @Column(name = "list_like")
    private int listLike = 0;
+
 
 
     public static ListEntity toSaveEntity(ListDTO listDTO, HttpSession session) {

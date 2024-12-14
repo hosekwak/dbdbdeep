@@ -26,11 +26,26 @@ public class ListController {
 
     // 리스트 전체 조회
     @GetMapping
-    public String list(@PageableDefault(size = 10, sort = "list_created_time", direction = Sort.Direction.DESC) Pageable pageable, Model model, HttpSession session) {
+    public String list(
+            @PageableDefault(size = 10, sort = "list_created_time", direction = Sort.Direction.DESC) Pageable pageable,
+            Model model,
+            HttpSession session
+    ) {
         Page<ListDTO> listPage = listService.paging(pageable);
         model.addAttribute("listPage", listPage);
+
+        int currentPage = listPage.getNumber() + 1; // 페이지 번호는 0부터 시작하므로 1을 더함
+        int totalPages = listPage.getTotalPages();
+
+        int startPage = ((currentPage - 1) / 10) * 10 + 1;
+        int endPage = Math.min(startPage + 9, totalPages);
+
+        model.addAttribute("startPage", startPage);
+        model.addAttribute("endPage", endPage);
+
         return "list"; // 반환하는 뷰 이름
     }
+
 
 
     // 저장 폼 요청
