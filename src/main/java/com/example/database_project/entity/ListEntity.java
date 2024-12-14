@@ -27,7 +27,7 @@ public class ListEntity extends ListBaseEntity {
    @Column(name = "list_title") //음식점 이름
    private String listTitle;
 
-   @Column(name = "list_contents")
+   @Column(name = "list_contents",length = 1000)
    private String listContents;
 
    @Column(name = "list_type")//음식점 종류(한식,양식,일식,주점)
@@ -42,17 +42,23 @@ public class ListEntity extends ListBaseEntity {
    @Column(name = "list_like")
    private int listLike = 0;
 
+   @Column
+   private int fileAttached = 0;
 
+   @OneToMany(mappedBy = "listEntity",cascade = CascadeType.REMOVE,orphanRemoval = true,fetch = FetchType.LAZY)
+   private List<ListFileEntity> listFileEntityList = new ArrayList<>();
 
     public static ListEntity toSaveEntity(ListDTO listDTO, HttpSession session) {
        ListEntity listEntity = new ListEntity();
        listEntity.setMember(MemberEntity.toMemberEntity((MemberDTO) session.getAttribute("memberDTO")));
        System.out.println("session result: " + session.getAttribute("id"));
        listEntity.setListTitle(listDTO.getListTitle());
+       listEntity.setListContents(listDTO.getListContents());
        listEntity.setListType(listDTO.getListType());
        listEntity.setListMenu(listDTO.getListMenu());
        listEntity.setListAddress(listDTO.getListAddress());
        listEntity.setListLike(listDTO.getListLike());
+       listEntity.setFileAttached(0);
        return listEntity;
    }
 
@@ -62,11 +68,26 @@ public class ListEntity extends ListBaseEntity {
       listEntity.setMember(MemberEntity.toMemberEntity((MemberDTO) session.getAttribute("memberDTO")));
       System.out.println("session result: " + session.getAttribute("id"));
       listEntity.setListTitle(listDTO.getListTitle());
+      listEntity.setListContents(listDTO.getListContents());
       listEntity.setListType(listDTO.getListType());
       listEntity.setListMenu(listDTO.getListMenu());
       listEntity.setListAddress(listDTO.getListAddress());
       listEntity.setListLike(listDTO.getListLike());
       return listEntity;
+   }
+
+   public static ListEntity toSaveFileEntity(ListDTO listDTO, HttpSession session) {
+       ListEntity listEntity = new ListEntity();
+       listEntity.setMember(MemberEntity.toMemberEntity((MemberDTO) session.getAttribute("memberDTO")));
+      System.out.println("session result: " + session.getAttribute("id"));
+       listEntity.setListTitle(listDTO.getListTitle());
+       listEntity.setListContents(listDTO.getListContents());
+       listEntity.setListType(listDTO.getListType());
+       listEntity.setListMenu(listDTO.getListMenu());
+       listEntity.setListAddress(listDTO.getListAddress());
+       listEntity.setListLike(listDTO.getListLike());
+       listEntity.setFileAttached(1);
+       return listEntity;
    }
 
 

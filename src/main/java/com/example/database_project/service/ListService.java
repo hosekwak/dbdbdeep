@@ -2,6 +2,8 @@ package com.example.database_project.service;
 
 import com.example.database_project.dto.ListDTO;
 import com.example.database_project.entity.ListEntity;
+import com.example.database_project.entity.ListFileEntity;
+import com.example.database_project.repository.ListFileRepository;
 import com.example.database_project.repository.ListRepository;
 import com.example.database_project.repository.MemberRepository;
 import jakarta.servlet.http.HttpSession;
@@ -15,7 +17,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,10 +30,9 @@ import java.util.Optional;
 public class ListService {
 
     private final ListRepository listRepository;
-    private final PropertyResolver propertyResolver;
+    private final ListFileRepository listFileRepository;
     private final MemberRepository memberRepository;
-    private final HttpSession httpSession;
-
+    private final PropertyResolver propertyResolver;
 
     public List<ListDTO> finALL() {
         List<ListEntity> listEntityList = listRepository.findlistAll();
@@ -41,17 +44,38 @@ public class ListService {
     }
 
     // 저장
-    public void save(ListDTO listDTO, HttpSession session) {
-        ListEntity listEntity = ListEntity.toSaveEntity(listDTO, session);
-        listRepository.saveList(
-                (Long) session.getAttribute("id"),
-                listEntity.getListTitle(),
-                listEntity.getListType(),
-                listEntity.getListMenu(),
-                listEntity.getListAddress(),
-                listEntity.getListLike()
+    public void save(ListDTO listDTO, HttpSession session) throws IOException {
+        if(listDTO.getListFile() == null || listDTO.getListFile().isEmpty()) {
+            ListEntity listEntity = ListEntity.toSaveEntity(listDTO, session);
+            listRepository.saveList(
+                    (Long) session.getAttribute("id"),
+                    listEntity.getListTitle(),
+                    listEntity.getListContents(),
+                    listEntity.getListType(),
+                    listEntity.getListMenu(),
+                    listEntity.getListAddress(),
+                    listEntity.getListLike(),
+                    listEntity.getFileAttached()
 
-        );
+            );
+        }
+        else {
+            ListEntity listEntity = ListEntity.toSaveFileEntity(listDTO, session);
+            long savedId = listRepository.save(listEntity).getLid();
+            ListEntity list = listRepository.findBylId(savedId).get();
+
+            for(MultipartFile listFile : listDTO.getListFile()) {
+                String originalFilename = listFile.getOriginalFilename();
+                String stroedFilename = System.currentTimeMillis() + "_" + originalFilename;
+                String savePath = "C:/springboot_img/" + stroedFilename;
+
+                listFile.transferTo(new File(savePath));
+
+                ListFileEntity listFileEntity = ListFileEntity.toListFileEntity(list,originalFilename,stroedFilename);
+                listFileRepository.save(listFileEntity);
+            }
+
+        }
     }
 
 
@@ -72,6 +96,7 @@ public class ListService {
         listRepository.updateList(
                 (Long) session.getAttribute("id"),
                 listEntity.getListTitle(),
+                listEntity.getListContents(),
                 listEntity.getListType(),
                 listEntity.getListMenu(),
                 listEntity.getListAddress(),
@@ -92,6 +117,7 @@ public class ListService {
                 entity.getLid(),
                 entity.getMember().getId(),
                 entity.getListTitle(),
+                entity.getListContents(),
                 entity.getListType(),
                 entity.getListMenu(),
                 entity.getListAddress(),
@@ -117,6 +143,7 @@ public class ListService {
                 entity.getLid(),
                 entity.getMember().getId(),
                 entity.getListTitle(),
+                entity.getListContents(),
                 entity.getListType(),
                 entity.getListMenu(),
                 entity.getListAddress(),

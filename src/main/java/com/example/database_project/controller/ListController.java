@@ -10,6 +10,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
@@ -43,23 +44,36 @@ public class ListController {
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
 
-        return "list"; // 반환하는 뷰 이름
+        return "list";
     }
 
+    @GetMapping("/{lid}/detail")
+    public String findById(@PathVariable Long lid, Model model,
+                           @RequestParam(value = "page",defaultValue = "0")int page) {
+        ListDTO listDTO = listService.findBylID(lid);
+        model.addAttribute("listDTO", listDTO);
+        model.addAttribute("page", page);
+        return "detail";
 
+    }
 
     // 저장 폼 요청
     @GetMapping("/save")
-    public String saveForm(HttpSession session) {
+    public String saveForm(Model model, HttpSession session) {
         System.out.println("session result: " + session.getAttribute("id"));
         System.out.println("session result: " + session.getAttribute("memberEmail"));
         System.out.println("session result: " + session.getAttribute("memberPassword"));
+
+        model.addAttribute("listDTO", new ListDTO()); // 리스트 DTO 객체를 모델에 추가
         return "Lsave";
     }
 
     // 데이터 저장
     @PostMapping("/save")
-    public String save(@ModelAttribute ListDTO listDTO, HttpSession session) {
+    public String save(@ModelAttribute("listDTO") ListDTO listDTO, BindingResult result, HttpSession session) throws IOException {
+        if (result.hasErrors()) {
+            return "Lsave"; // 오류가 있을 경우 폼 페이지로 돌아감
+        }
         listService.save(listDTO, session);
         System.out.println("session result: " + session.getAttribute("id"));
         return "redirect:/list";
