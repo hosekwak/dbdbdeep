@@ -8,6 +8,8 @@ import jakarta.servlet.http.HttpSession;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.List;
+
 @Entity
 @Getter
 @Setter
@@ -36,6 +38,8 @@ public class ListEntity extends ListBaseEntity {
    @Column(name = "list_like")
    private int listLike = 0;
 
+   @OneToMany(mappedBy = "listId", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+   private List<FavoriteEntity> favoriteEntities;
 
     public static ListEntity toSaveEntity(ListDTO listDTO, HttpSession session) {
        ListEntity listEntity = new ListEntity();

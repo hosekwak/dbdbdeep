@@ -151,7 +151,8 @@
         <td th:text="${list.listAddress}"></td>
         <td>
             <form action="/list/like" method="post" style="margin: 0;">
-                <input type="hidden" name="id" th:value="${list.id}" />
+                <input type="hidden" name="LID" th:value="${list.id}" />
+                <input type="hidden" name="MID" th:value="${session.memberDTO.getId()}" />
                 <button type="submit" class="like-btn">좋아요</button>
             </form>
             <span th:text="${list.listLike}"></span>

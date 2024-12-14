@@ -2,6 +2,7 @@ package com.example.database_project.controller;
 
 import com.example.database_project.dto.ListDTO;
 import com.example.database_project.dto.MemberDTO;
+import com.example.database_project.service.FavoriteService;
 import com.example.database_project.service.ListService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -23,6 +24,7 @@ import java.util.List;
 public class ListController {
 
     private final ListService listService;
+    private final FavoriteService favoriteService;
 
     // 리스트 전체 조회
     @GetMapping
@@ -88,8 +90,9 @@ public class ListController {
     }
 
     @PostMapping("/like")
-    public String increaseLike(@RequestParam Long id) {
-        listService.increaseLike(id); // 좋아요 증가 처리
+    public String increaseLike(@RequestParam Long LID, @RequestParam Long MID) {
+
+        favoriteService.addFavorite(LID, MID);
         return "redirect:/list"; // 목록 페이지로 리다이렉트
     }
 

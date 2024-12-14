@@ -30,6 +30,9 @@ public class MemberEntity {
     @OneToMany(mappedBy = "member", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
     private List<ListEntity> listEntities;
 
+    @OneToMany(mappedBy = "memberId", cascade = CascadeType.REMOVE, fetch = FetchType.LAZY)
+    private List<FavoriteEntity> favoriteEntities;
+
     public static MemberEntity toMemberEntity(MemberDTO memberDTO) {
         MemberEntity memberEntity = new MemberEntity();
         memberEntity.setMemberEmail(memberDTO.getMemberEmail());
