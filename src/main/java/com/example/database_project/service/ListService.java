@@ -33,16 +33,8 @@ public class ListService {
     private final ListRepository listRepository;
     private final ListFileRepository listFileRepository;
     private final MemberRepository memberRepository;
-    private final PropertyResolver propertyResolver;
 
-    public List<ListDTO> finALL() {
-        List<ListEntity> listEntityList = listRepository.findlistAll();
-        List<ListDTO> listDTOList = new ArrayList<>();
-        for(ListEntity listEntity : listEntityList) {
-            listDTOList.add(ListDTO.toListDTO(listEntity));
-        }
-        return listDTOList;
-    }
+
 
     // 저장
     @Transactional
@@ -53,8 +45,8 @@ public class ListService {
         }
 
         // MemberEntity 조회
-        MemberEntity member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("Member not found"));
+        MemberEntity member = memberRepository.findBymId(memberId);
+
 
         boolean fileExists = listDTO.getListFile() != null &&
                 listDTO.getListFile().stream().anyMatch(file -> file != null && !file.isEmpty());
@@ -110,12 +102,12 @@ public class ListService {
         }
 
         // MemberEntity 조회
-        MemberEntity member = memberRepository.findById(memberId)
-                .orElseThrow(() -> new RuntimeException("Member not found"));
+        MemberEntity member = memberRepository.findBymId(memberId);
+
 
         // ListEntity 조회
-        ListEntity listEntity = listRepository.findById(listDTO.getId())
-                .orElseThrow(() -> new RuntimeException("ListEntity not found"));
+        ListEntity listEntity = listRepository.findByllId(listDTO.getId());
+
 
         // 필드 업데이트
         listEntity.setMember(member);
@@ -130,8 +122,7 @@ public class ListService {
         listRepository.save(listEntity); // 변경 사항 저장
 
         if (listDTO.getListFile() != null && !listDTO.getListFile().isEmpty()) {
-            // 기존 파일 삭제 (옵션)
-            // listFileRepository.deleteAll(listEntity.getListFileEntityList());
+
 
             // 새로운 파일 첨부
             for (MultipartFile listFile : listDTO.getListFile()) {
@@ -151,7 +142,7 @@ public class ListService {
     // 데이터 삭제
     @Transactional
     public void deleteById(Long id, Long memberId) {
-        ListEntity listEntity = listRepository.findById(id)
+        ListEntity listEntity = listRepository.findBylId(id)
                 .orElseThrow(() -> new RuntimeException("ListEntity not found"));
 
         // 권한 확인
@@ -159,7 +150,7 @@ public class ListService {
             throw new RuntimeException("You are not authorized to delete this item!");
         }
 
-        listRepository.delete(listEntity); // CascadeType.REMOVE에 의해 ListFileEntity도 삭제됨
+        listRepository.deleteList(listEntity.getLid()); // CascadeType.REMOVE에 의해 ListFileEntity도 삭제됨
     }
 
     public Page<ListDTO> paging(Pageable pageable) {
@@ -211,15 +202,7 @@ public class ListService {
                 entity.getListLike()
         ));
     }
-    @Transactional
-    public void increaseLike(Long id) {
-        listRepository.incrementLike(id); // 좋아요 수 증가 쿼리 실행
-    }
 
-    @Transactional
-    public void decreaseLike(Long id) {
-        listRepository.decrementLike(id); // 좋아요 수 증가 쿼리 실행
-    }
 
     public Page<ListDTO> search(String keyword, Pageable pageable) {
         int page = Math.max(pageable.getPageNumber(), 0);

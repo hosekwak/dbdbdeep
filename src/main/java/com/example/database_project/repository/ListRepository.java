@@ -16,37 +16,6 @@ import java.util.Optional;
 @Repository
 public interface ListRepository extends JpaRepository<ListEntity, Long> {
 
-    @Modifying
-    @Transactional
-    @Query(value = "INSERT INTO list_table (member_id, list_title, list_contents, list_type, list_menu, list_address, list_like, list_created_time, list_updated_time, list_file_attached) " +
-            "VALUES (:memberId, :listTitle, :listContents, :listType, :listMenu, :listAddress, :listLike, NOW(), NOW(), :fileAttached)",
-            nativeQuery = true)
-    void saveList(
-            @Param("memberId") Long memberId,
-            @Param("listTitle") String listTitle,
-            @Param("listContents") String listContents,
-            @Param("listType") String listType,
-            @Param("listMenu") String listMenu,
-            @Param("listAddress") String listAddress,
-            @Param("listLike") int listLike,
-            @Param("fileAttached") int fileAttached);
-
-
-    // UPDATE 쿼리
-    @Modifying
-    @Transactional
-    @Query(value = "UPDATE list_table SET member_id = :memberId, list_title = :listTitle,list_contents = :listContents, list_type = :listType, list_menu = :listMenu, list_address = :listAddress, list_like = :listLike, list_updated_time = NOW() " +
-            "WHERE lid = :id",
-            nativeQuery = true)
-    void updateList(
-            @Param("memberId") Long memberId,
-            @Param("listTitle") String listTitle,
-            @Param("listContents") String listContents,
-            @Param("listType") String listType,
-            @Param("listMenu") String listMenu,
-            @Param("listAddress") String listAddress,
-            @Param("listLike") int listLike,
-            @Param("id") Long id);
 
 
     // SELECT 쿼리 (전체 리스트 조회)
@@ -57,11 +26,11 @@ public interface ListRepository extends JpaRepository<ListEntity, Long> {
     @Query("SELECT l FROM ListEntity l WHERE l.lid = :id")
     Optional<ListEntity> findBylId(@Param("id") Long id);
 
-    // DELETE 쿼리
-    @Modifying
-    @Transactional
-    @Query(value = "DELETE FROM list_table WHERE lid = :id", nativeQuery = true)
-    void deleteBylId(@Param("id") Long id);
+    // SELECT 쿼리 (특정 ID로 조회)
+    @Query("SELECT l FROM ListEntity l WHERE l.lid = :id")
+    ListEntity findByllId(@Param("id") Long id);
+
+
 
     @Modifying
     @Transactional
