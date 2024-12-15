@@ -6,6 +6,7 @@ import com.example.database_project.service.FavoriteService;
 import com.example.database_project.service.ListService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -30,36 +31,49 @@ public class ListController {
     // 리스트 전체 조회
     @GetMapping
     public String list(
-            @PageableDefault(size = 10, sort = "list_created_time", direction = Sort.Direction.DESC) Pageable pageable,
+            @RequestParam(value = "page", required = false) Integer page,
+            @RequestParam(value = "size", defaultValue = "10") Integer size,
+            @RequestParam(value = "keyword", required = false) String keyword,
+            @RequestParam(value = "sort", defaultValue = "id,desc") String sort,
             Model model,
             HttpSession session
     ) {
-        System.out.println("option result: " + session.getAttribute("option"));
-        if(session.getAttribute("id") == null) {
+        if (session.getAttribute("id") == null) {
             return "/home";
         }
-        System.out.println("stop point: 40");
-        int option = (int) session.getAttribute("option");
-        // sortBy 값에 따라 다른 정렬 방식을 처리
-        Page<ListDTO> listPage = listService.paging(pageable);
-        if (option == 1) {
-            listPage = listService.pagingSortByLike(pageable); // 추천순 정렬
-        }
-        else if (option == 2) {
-            listPage = listService.pagingMyFavorite(pageable, (Long) session.getAttribute("id")); // 좋아요 표시한 리스트들만 정렬
-        }
-        model.addAttribute("listPage", listPage);
-        int currentPage = listPage.getNumber() + 1; // 페이지 번호는 0부터 시작하므로 1을 더함
-        int totalPages = listPage.getTotalPages();
-        System.out.println("stop point: 50");
-        int startPage = ((currentPage - 1) / 10) * 10 + 1;
-        int endPage = Math.min(startPage + 9, totalPages);
 
+        if (page == null || page < 0) page = 0;
+        if (size == null || size <= 0) size = 10;
+
+        // 정렬 옵션 추가
+        String[] sortParts = sort.split(",");
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.fromString(sortParts[1]), sortParts[0]));
+
+        Page<ListDTO> listPage;
+
+        int option = (session.getAttribute("option") != null) ? (int) session.getAttribute("option") : 0;
+
+        if (option == 1) {
+            listPage = listService.pagingSortByLike(pageable);
+        } else if (option == 2) {
+            listPage = listService.pagingMyFavorite(pageable, (Long) session.getAttribute("id"));
+        } else {
+            listPage = (keyword == null || keyword.isEmpty()) ? listService.paging(pageable) : listService.search(keyword, pageable);
+        }
+
+        int blockLimit = 10;
+        int currentPage = listPage.getNumber();
+        int startPage = (currentPage / blockLimit) * blockLimit + 1;
+        int endPage = Math.min(startPage + blockLimit - 1, listPage.getTotalPages());
+
+        model.addAttribute("listPage", listPage);
         model.addAttribute("startPage", startPage);
         model.addAttribute("endPage", endPage);
-        System.out.println("stop point: 60");
-        return "/list"; // 반환하는 뷰 이름
+        model.addAttribute("currentPage", currentPage);
+
+        return "/list";
     }
+
 
     @GetMapping("/sortbylike")
     public String listSortByLike(
@@ -183,15 +197,7 @@ public class ListController {
         return "redirect:/list"; // 목록 페이지로 리다이렉트
     }
 
-    @GetMapping("/search")
-    public String search(@RequestParam String keyword,
-                         @PageableDefault(size = 10, sort = "list_created_time", direction = Sort.Direction.DESC) Pageable pageable,
-                         Model model) {
-        Page<ListDTO> searchResults = listService.search(keyword, pageable);
-        model.addAttribute("listPage", searchResults);
-        model.addAttribute("keyword", keyword);
-        return "/list";
-    }
+
 
 
 

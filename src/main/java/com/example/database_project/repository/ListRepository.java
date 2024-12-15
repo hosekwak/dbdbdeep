@@ -75,7 +75,7 @@ public interface ListRepository extends JpaRepository<ListEntity, Long> {
     void decrementLike(@Param("listId") Long listId);
 
 
-    @Query(value = "SELECT * FROM list_table ORDER BY list_created_time DESC",
+    @Query(value = "SELECT * FROM list_table ORDER BY lid DESC",
             countQuery = "SELECT COUNT(*) FROM list_table",
             nativeQuery = true)
     Page<ListEntity> findAllWithPaging(Pageable pageable);

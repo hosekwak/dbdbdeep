@@ -163,7 +163,13 @@ public class ListService {
     }
 
     public Page<ListDTO> paging(Pageable pageable) {
-        Page<ListEntity> listEntities = listRepository.findAllWithPaging(pageable);
+        int page = Math.max(pageable.getPageNumber(), 0);
+        int pageLimit = 10;
+
+        Page<ListEntity> listEntities = listRepository.findAllWithPaging(
+                PageRequest.of(page, pageLimit, Sort.by(Sort.Direction.DESC, "lid"))
+        );
+
         return listEntities.map(entity -> new ListDTO(
                 entity.getLid(),
                 entity.getMember().getId(),
@@ -176,7 +182,9 @@ public class ListService {
         ));
     }
     public Page<ListDTO> pagingSortByLike(Pageable pageable) {
-        Page<ListEntity> listEntities = listRepository.findAllWithPagingSortByLike(pageable);
+        int page = Math.max(pageable.getPageNumber(), 0);
+        int pageLimit = 10;
+        Page<ListEntity> listEntities = listRepository.findAllWithPagingSortByLike(PageRequest.of(page, pageLimit));
         return listEntities.map(entity -> new ListDTO(
                 entity.getLid(),
                 entity.getMember().getId(),
@@ -189,7 +197,9 @@ public class ListService {
         ));
     }
     public Page<ListDTO> pagingMyFavorite(Pageable pageable, Long memberId) {
-        Page<ListEntity> listEntities = listRepository.findAllWithPagingMyFavorite(pageable, memberId);
+        int page = Math.max(pageable.getPageNumber(), 0);
+        int pageLimit = 10;
+        Page<ListEntity> listEntities = listRepository.findAllWithPagingMyFavorite(PageRequest.of(page, pageLimit), memberId);
         return listEntities.map(entity -> new ListDTO(
                 entity.getLid(),
                 entity.getMember().getId(),
@@ -212,7 +222,9 @@ public class ListService {
     }
 
     public Page<ListDTO> search(String keyword, Pageable pageable) {
-        Page<ListEntity> searchResults = listRepository.searchAllByKeyword(keyword, pageable);
+        int page = Math.max(pageable.getPageNumber(), 0);
+        int pageLimit = 10;
+        Page<ListEntity> searchResults = listRepository.searchAllByKeyword(keyword, PageRequest.of(page, pageLimit));
 
         return searchResults.map(entity -> new ListDTO(
                 entity.getLid(),

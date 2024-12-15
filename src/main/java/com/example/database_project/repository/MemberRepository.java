@@ -19,5 +19,5 @@ public interface MemberRepository extends JpaRepository<MemberEntity, Long> {
 
     @Transactional
     @Query(value = "select * from member where id = ?1", nativeQuery = true)
-    MemberEntity findById(long id);
+    MemberEntity findBymId(long id);
 }
