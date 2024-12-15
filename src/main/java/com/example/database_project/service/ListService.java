@@ -150,7 +150,7 @@ public class ListService {
             throw new RuntimeException("You are not authorized to delete this item!");
         }
 
-        listRepository.deleteList(listEntity.getLid()); // CascadeType.REMOVE에 의해 ListFileEntity도 삭제됨
+        listRepository.delete(listEntity);
     }
 
     public Page<ListDTO> paging(Pageable pageable) {
